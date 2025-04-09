@@ -15,8 +15,10 @@ This project was born out of the need to build a custom domain service with auto
 - [x] Rest API Access
 - [x] Proxy management dashboard
 - [x] API Keys management dashboard
-- [ ] Domain redirection option
+- [x] Domain redirection option
 - [ ] Multi user support
+- [ ] Health check
+- [ ] Nofify user on health fail
 
 ## Screenshots
 
