@@ -21,6 +21,12 @@ model Domains {
   port               Int
   isLocked           Boolean  @default(false)
   enableHttps        Boolean  @default(true)
+  redirectUrl        String?
+  healthCheckUrl     String?
+  healthCheckMethod  String?
+  healthCheckInterval Int?
+  lastHealthStatus   Boolean? 
+  lastCheckedAt      DateTime?
   createdAt          DateTime @default(now())
 }
 

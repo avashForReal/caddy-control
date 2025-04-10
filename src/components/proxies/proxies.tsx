@@ -1,5 +1,5 @@
 import { DomainWithCheckResults } from "@/app/api/domain/domain-types";
-import { Check, Trash, X } from "lucide-react";
+import { Check, HeartPulse, Trash, X } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -32,9 +32,16 @@ const ProxyRecord = ({ record }: ProxyRecordProps) => {
             <span><Badge variant={'outline'}>SSL Enabled</Badge></span>
           )
         }
+        {
+          record.redirectUrl && (
+            <span><Badge variant={'outline'} className="bg-blue-50">Redirects to {record.redirectUrl}</Badge></span>
+          )
+        }
       </div>
       <div className="text-sm text-gray-500">
-        Routes to <span className="font-bold text-gray-700">{record.destinationAddress}</span> on port <span className="font-bold text-gray-700">{record.port}</span>
+        {!record.redirectUrl && (
+          <>Routes to <span className="font-bold text-gray-700">{record.destinationAddress}</span> on port <span className="font-bold text-gray-700">{record.port}</span></>
+        )}
       </div>
     </div>
   )
@@ -75,6 +82,32 @@ const ProxyRecordCheckResults = ({ record, handleDeleteClick }: ProxyCheckResult
           </TooltipContent>
         </Tooltip>
       </div>
+      
+      {/* Health Check Status */}
+      <div className="flex items-center justify-start gap-1 text-md text-gray-500">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex items-center justify-start gap-1 text-md text-gray-500">
+              <HeartPulse className={`h-5 w-5 ${record.checkResults.healthCheck?.result 
+                ? "text-green-500" 
+                : "text-red-400"}`} 
+              />
+              <span className="font-medium">
+                {record.checkResults.healthCheck?.result ? 'Healthy' : 'Unhealthy'}
+              </span>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent className="max-w-xs">
+            <p>{record.checkResults.healthCheck?.description || 'Health check not configured'}</p>
+            {record.checkResults.healthCheck?.lastChecked && (
+              <p className="text-xs text-gray-400 mt-1">
+                Last checked: {new Date(record.checkResults.healthCheck.lastChecked).toLocaleString()}
+              </p>
+            )}
+          </TooltipContent>
+        </Tooltip>
+      </div>
+      
       {canDeleteProxy && (
         <Button
           size='icon'

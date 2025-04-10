@@ -19,7 +19,7 @@ export type MainConfig = {
 
 export type RouteConfig = {
 	match: { host: string[] }[];
-	handle: HandlerConfig[] | RouteHandlerConfig[];
+	handle: RouteHandlerConfig[];
 };
 
 export type RouteHandlerConfig = {
@@ -28,18 +28,34 @@ export type RouteHandlerConfig = {
 }
 
 export type HandlerConfig = {
-	handler: "reverse_proxy";
-	upstreams: { dial: string }[];
-	headers: {
-		request: {
+	handler: "reverse_proxy" | "static_response" | "authentication";
+	providers?: {
+		http_basic: {
+			accounts: [
+				{
+					password: string;
+					username: string;
+				}
+			],
+			hash: {
+				algorithm: "bcrypt"
+			},
+			hash_cache: {}
+		},
+	},
+	upstreams?: { dial: string }[];
+	headers?: {
+		request?: {
 			set: {
 				Host: string[];
 				"X-Origin-Host": string[];
 				"X-Origin-IP": string[];
 			};
 		};
+		Location?: string[];
 	};
-	transport: {
+	status_code?: number
+	transport?: {
 		protocol: string;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		tls?: Record<string, any>;
