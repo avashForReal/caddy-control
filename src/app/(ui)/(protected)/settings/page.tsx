@@ -11,13 +11,16 @@ import PermissionsManagement from "@/components/user/permissions";
 import UserManagement from "@/components/user/user-management";
 import { Spinner } from "@/components/ui/spinner";
 import { BoxLoader } from "@/components/loader";
+import { Resources } from "@/config/resources";
 
 export default function SettingsPage() {
   const router = useRouter();
   const { accessToken, user, setUser } = useAuthStore();
   const { isLoading } = useGetProfile(!!accessToken);
   const { data: userData, isLoading: isLoadingProfile } = useGetProfile(!!accessToken)
-  const hasSettingsAccess = user?.isAdmin || hasPermission('system:manage') || hasPermission('system:view');
+  const hasSettingsAccess = user?.isAdmin || 
+                           hasPermission(Resources.WithManage(Resources.USER_MANAGEMENT)) || 
+                           hasPermission(Resources.WithView(Resources.USER_MANAGEMENT));
 
   useEffect(() => {
     if (userData) {

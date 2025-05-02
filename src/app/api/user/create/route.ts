@@ -2,22 +2,26 @@ import { NextRequest, NextResponse } from "next/server";
 import { CreateUserSchema } from "@/schemas/user/auth.schema";
 import prisma from "@/lib/prisma";
 import { z } from "zod";
-import { getUserFromHeader, hasPermission } from "../../_services/user/user-service";
+import {
+  getUserFromHeader,
+  hasPermission,
+} from "../../_services/user/user-service";
 import bcrypt from "bcryptjs";
+import { Resources } from "@/config/resources";
 
 export async function POST(request: NextRequest) {
   try {
     const user = await getUserFromHeader(request);
-    
+
     if (!user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    
-    // Check if user has permission to create users (requires admin or system:manage)
-    if (!user.isAdmin && !hasPermission(user, "system:manage")) {
+
+    // Check if user has permission to create users (requires admin or user_management:manage)
+    if (
+      !user.isAdmin &&
+      !hasPermission(user, Resources.WithManage(Resources.USER_MANAGEMENT))
+    ) {
       return NextResponse.json(
         { error: "Forbidden - Insufficient permissions" },
         { status: 403 }
@@ -26,11 +30,17 @@ export async function POST(request: NextRequest) {
 
     const reqBody = await request.json();
     const reqPayload = CreateUserSchema.parse(reqBody);
-    const { username, password, isAdmin, roleId, forcePasswordChange = true } = reqPayload;
+    const {
+      username,
+      password,
+      isAdmin,
+      roleId,
+      forcePasswordChange = true,
+    } = reqPayload;
 
     // Check if username already exists
     const existingUser = await prisma.user.findUnique({
-      where: { username }
+      where: { username },
     });
 
     if (existingUser) {
@@ -43,7 +53,7 @@ export async function POST(request: NextRequest) {
     // Check if role exists when roleId is provided
     if (roleId) {
       const role = await prisma.role.findUnique({
-        where: { id: roleId }
+        where: { id: roleId },
       });
 
       if (!role) {
@@ -64,8 +74,8 @@ export async function POST(request: NextRequest) {
         hashedPassword,
         isAdmin: isAdmin || false,
         roleId: roleId || null,
-        forcePasswordChange
-      }
+        forcePasswordChange,
+      },
     });
 
     // Return success response without sending back the hash
@@ -77,8 +87,8 @@ export async function POST(request: NextRequest) {
           username: newUser.username,
           isAdmin: newUser.isAdmin,
           forcePasswordChange: newUser.forcePasswordChange,
-          roleId: newUser.roleId
-        }
+          roleId: newUser.roleId,
+        },
       },
       { status: 201 }
     );

@@ -42,6 +42,7 @@ import { DeleteUserConfirm } from "./delete-user-confirm";
 import { User } from "@/schemas/user/user.schema";
 import { PlusIcon, MoreHorizontalIcon, KeyIcon, TrashIcon } from "lucide-react";
 import { useAuthStore, hasPermission } from "@/store/authStore";
+import { Resources } from "@/config/resources";
 
 export default function UserManagement() {
   const { data: userData, isLoading: loadingUsers } = useGetUsers();
@@ -50,8 +51,11 @@ export default function UserManagement() {
   const { mutate: assignRole, isPending } = useAssignRole();
   const { user } = useAuthStore();
   
+  // Check if user can view settings
+  const canView = user?.isAdmin || hasPermission(Resources.WithManage(Resources.USER_MANAGEMENT)) || hasPermission(Resources.WithView(Resources.USER_MANAGEMENT));
+  
   // Check if user can modify settings
-  const canModify = user?.isAdmin || hasPermission('system:manage');
+  const canModify = user?.isAdmin || hasPermission(Resources.WithManage(Resources.USER_MANAGEMENT));
   
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
   const [isCreateUserDialogOpen, setIsCreateUserDialogOpen] = useState(false);
@@ -122,6 +126,10 @@ export default function UserManagement() {
         <div className="flex justify-center p-4">
           <Spinner />
         </div>
+      ) : !canView ? (
+        <div className="text-center py-4">
+          You don't have permission to view this content
+        </div>
       ) : (
         <div className="rounded-md border">
           <Table>
@@ -158,6 +166,7 @@ export default function UserManagement() {
                             username: user.username,
                             roleId: user.role?.id
                           })}
+                          disabled={user.isAdmin}
                         >
                           {user.role?.id ? "Change Role" : "Assign Role"}
                         </Button>

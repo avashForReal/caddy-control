@@ -1,7 +1,7 @@
 "use client";
 
 import { Role } from "@/schemas/user/user.schema";
-import { useGetRoles } from "@/hooks/user/roles.hooks";
+import { useGetRoles, useGetPermissions } from "@/hooks/user/roles.hooks";
 import {
   Table,
   TableBody,
@@ -17,16 +17,21 @@ import { CreateRoleDialog } from "@/components/user/create-role-dialog";
 import { EditRoleDialog } from "@/components/user/edit-role-dialog";
 import { Spinner } from "../ui/spinner";
 import { useAuthStore, hasPermission } from "@/store/authStore";
+import { Resources } from "@/config/resources";
 
 export default function RolesManagement() {
   const { data: rolesData, isLoading } = useGetRoles();
+  const { data: permissionsData } = useGetPermissions();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const { user } = useAuthStore();
   
+  // Check if user has view permissions
+  const canView = user?.isAdmin || hasPermission(Resources.WithManage(Resources.USER_MANAGEMENT)) || hasPermission(Resources.WithView(Resources.USER_MANAGEMENT));
+  
   // Check if user can modify settings
-  const canModify = user?.isAdmin || hasPermission('system:manage');
+  const canModify = user?.isAdmin || hasPermission(Resources.WithManage(Resources.USER_MANAGEMENT));
 
   const handleEditRole = (role: Role) => {
     if (!canModify) return;
@@ -47,6 +52,10 @@ export default function RolesManagement() {
         <div className="flex justify-center p-4">
           <Spinner />
         </div>
+      ) : !canView ? (
+        <div className="text-center py-4">
+          You don't have permission to view this content
+        </div>
       ) : (
         <div className="rounded-md border">
           <Table>
@@ -64,16 +73,29 @@ export default function RolesManagement() {
                   <TableCell className="font-medium">{role.name}</TableCell>
                   <TableCell>{role.description || "-"}</TableCell>
                   <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {role.permissions?.map((permission) => (
-                        <Badge key={permission.id} variant="secondary">
-                          {permission.name}
-                        </Badge>
-                      ))}
-                      {!role.permissions?.length && (
-                        <span className="text-gray-500">No permissions</span>
-                      )}
-                    </div>
+                    {role.name.toLowerCase() === "admin" ? (
+                      <div className="flex flex-wrap gap-1 max-h-32 overflow-y-auto">
+                        {permissionsData?.data?.map((permission) => (
+                          <Badge key={permission.id} variant="secondary" className="text-xs">
+                            {permission.name}
+                          </Badge>
+                        ))}
+                        {!permissionsData?.data?.length && (
+                          <span className="text-gray-500">Loading permissions...</span>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex flex-wrap gap-1">
+                        {role.permissions?.map((permission) => (
+                          <Badge key={permission.id} variant="secondary">
+                            {permission.name}
+                          </Badge>
+                        ))}
+                        {!role.permissions?.length && (
+                          <span className="text-gray-500">No permissions</span>
+                        )}
+                      </div>
+                    )}
                   </TableCell>
                   {canModify && (
                     <TableCell>
@@ -81,6 +103,7 @@ export default function RolesManagement() {
                         variant="outline" 
                         size="sm" 
                         onClick={() => handleEditRole(role)}
+                        disabled={role.name.toLowerCase() === "admin"}
                       >
                         Edit
                       </Button>
