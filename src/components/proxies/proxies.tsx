@@ -5,6 +5,8 @@ import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import ProxyDeleteConfirm from "./proxy-delete-confirm";
 import { useState } from "react";
+import { hasPermission } from "@/store/authStore";
+import { Resources } from "@/config/resources";
 
 type Props = {
   proxyData: {
@@ -25,21 +27,31 @@ const ProxyRecord = ({ record }: ProxyRecordProps) => {
   return (
     <div className="flex flex-col items-start gap-1">
       <div className="font-semibold flex items-center justify-start gap-2">
-        {record.incomingAddress}
+        <a href={`${record.enableHttps ? "https": "http"}://${record.incomingAddress}`} target="_blank" rel="noopener noreferrer">{record.incomingAddress}</a>
         {
           record.enableHttps && (
             <span><Badge variant={'outline'}>SSL Enabled</Badge></span>
           )
         }
+        {
+          record.redirectUrl && (
+            <span><Badge variant={'outline'} className="bg-blue-50">Redirects to {record.redirectUrl}</Badge></span>
+          )
+        }
       </div>
       <div className="text-sm text-gray-500">
-        Routes to <span className="font-bold text-gray-700">{record.destinationAddress}</span> on port <span className="font-bold text-gray-700">{record.port}</span>
+        {!record.redirectUrl && (
+          <>Proxy to <span className="font-bold text-gray-700">{record.destinationAddress}</span> on port <span className="font-bold text-gray-700">{record.port}</span></>
+        )}
       </div>
     </div>
   )
 }
 
 const ProxyRecordCheckResults = ({ record, handleDeleteClick }: ProxyCheckResults) => {
+  // Check if user has permission to delete proxies
+  const canDeleteProxy = hasPermission(Resources.WithManage(Resources.PROXY_MANAGEMENT));
+  
   return (
     <div className="flex items-center justify-start gap-6">
       <div className="flex items-center justify-start gap-1 text-md text-gray-500">
@@ -71,15 +83,17 @@ const ProxyRecordCheckResults = ({ record, handleDeleteClick }: ProxyCheckResult
           </TooltipContent>
         </Tooltip>
       </div>
-      <Button
-        size='icon'
-        variant='ghost'
-        disabled={record.isLocked}
-        onClick={() => handleDeleteClick(record)}
-        className="cursor-pointer hover:bg-red-100 text-red-400 hover:text-red-500"
-      >
-        <Trash />
-      </Button>
+      {canDeleteProxy && (
+        <Button
+          size='icon'
+          variant='ghost'
+          disabled={record.isLocked}
+          onClick={() => handleDeleteClick(record)}
+          className="cursor-pointer hover:bg-red-100 text-red-400 hover:text-red-500"
+        >
+          <Trash />
+        </Button>
+      )}
     </div>
   )
 }

@@ -11,7 +11,7 @@ const NAV_ITEMS = [
     { name: "API Keys", href: "/api-keys" },
     {
         name: "Docs",
-        href: "https://github.com/avashForReal/caddy-control",
+        href: "/docs",
         newTab: true,
         icon: <IconExternalLink stroke={1.5} width={16} height={16} />
     },
@@ -30,12 +30,14 @@ const TopHeader = () => {
             <Header>
                 <div className='flex items-center justify-between gap-4 w-full'>
                     {/* logo */}
-                    <div className="flex items-center justify-start gap-2">
-                        <IconDrone stroke={1.25} />
-                        <div className="text-lg font-bold text-gray-700">
-                            Caddy Control
+                    <Link href="/">
+                        <div className="flex items-center justify-start gap-2">
+                            <IconDrone stroke={1.25} />
+                            <div className="text-lg font-bold text-gray-700">
+                                Caddy Control
+                            </div>
                         </div>
-                    </div>
+                    </Link>
 
                     {/* Navigation */}
                     <nav className="flex items-center gap-6">

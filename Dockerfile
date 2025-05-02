@@ -1,4 +1,4 @@
-FROM node:20.14.0-alpine3.20 AS base
+FROM node:jod-bookworm-slim AS base
 RUN npm install -g pnpm
 WORKDIR /app
 
@@ -10,18 +10,22 @@ RUN pnpm install --frozen-lockfile
 # build stage
 FROM base AS builder
 WORKDIR /app
+RUN apt-get update -y && apt-get install -y openssl
 COPY --from=dependencies /app/node_modules ./node_modules
 COPY . .
 RUN pnpx prisma generate
+RUN pnpm run build:content
 RUN pnpm build
 
 # production stage
 FROM base AS runner
 WORKDIR /app
+RUN apt-get update -y && apt-get install -y openssl
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/.contentlayer ./.contentlayer
 COPY --from=builder /app/start.sh ./start.sh
 RUN chmod +x /app/start.sh
 

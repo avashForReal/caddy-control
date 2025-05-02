@@ -6,9 +6,40 @@ import Proxies from "@/components/proxies/proxies";
 import ProxiesActions from "@/components/proxies/proxies-actions";
 import { Separator } from "@/components/ui/separator";
 import { useGetRegisteredDomains } from "@/hooks/domains/domain.hooks";
+import { useGetProfile } from "@/hooks/user/user.hooks";
+import { useAuthStore } from "@/store/authStore";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function Home() {
+  const { accessToken, setUser } = useAuthStore();
   const { data, isLoading } = useGetRegisteredDomains();
+  const [checking, setChecking] = useState(true);
+  const { data: userData, isLoading: isLoadingProfile } = useGetProfile(!!accessToken);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!accessToken && !checking) {
+      router.push("/login");
+    } else {
+      setChecking(false);
+    }
+  }, [accessToken, router, checking]);
+
+
+  useEffect(() => {
+    if (userData) {
+      setUser(userData);
+    }
+  }, [userData, setUser]);
+
+  if (isLoadingProfile) {
+    return (
+      <BoxLoader />
+    );
+  }
+
+  if (checking) return null;
 
   return (
     <div className="mt-4 px-4 mb-24 flex flex-col h-full">

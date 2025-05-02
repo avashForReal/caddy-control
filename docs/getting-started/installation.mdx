@@ -1,0 +1,204 @@
+---
+title: Installation
+description: How to set up Caddy Control on your computer or server
+date: 2025-04-18
+---
+
+# Installation Guide
+
+This guide will show you how to install Caddy Control on your own computer for testing, or on a server for real-world use.
+
+## Setting Up on Your Computer
+
+<Steps>
+  <Step>
+    <StepTitle>Step 1: Get the Code</StepTitle>
+    <StepContent>
+    <div>
+      <div>
+        Copy the Caddy Control files to your computer:
+      </div>
+      ```sh
+      git clone https://github.com/avashForReal/caddy-control.git
+      cd caddy-control
+      ```
+      </div>
+    </StepContent>
+  </Step>
+  
+  <Step>
+    <StepTitle>Step 2: Set Up the Server Part</StepTitle>
+    <StepContent>
+    <div>
+      <p>Start the Caddy Server using our ready-made setup:</p>
+      
+      ```sh
+      pnpm dev:caddy
+      ```
+      
+      This starts a Caddy Server on your computer using Docker.
+      
+      <Note>
+        You can also install Caddy directly if you prefer, by following the <a href="https://caddyserver.com/docs/install" target="_blank" rel="noopener noreferrer">Caddy installation instructions</a>.
+      </Note>
+      </div>
+    </StepContent>
+  </Step>
+  
+  <Step>
+    <StepTitle>Step 3: Set Up Your Settings</StepTitle>
+    <StepContent>
+    <div>
+      Create a file named `.env` in the main folder with these settings:
+      
+      ```zsh
+APP_HOST=localhost
+CADDY_SERVER_IP=localhost
+CADDY_ADMIN_URL=http://localhost:2019
+JWT_SECRET="mysecretkey"
+      ```
+      <Note>
+        Make sure to change the `JWT_SECRET` to a strong password.
+      <strong>What these settings mean:</strong>
+      <ul>
+        <li><strong>APP_HOST</strong>: Where your app will run (use localhost for testing)</li>
+        <li><strong>CADDY_SERVER_IP</strong>: Where Caddy is running (use localhost for testing)</li>
+        <li><strong>CADDY_ADMIN_URL</strong>: How to connect to Caddy's control panel</li>
+        <li><strong>JWT_SECRET</strong>: A password for keeping your login secure</li>
+      </ul>
+      </Note>
+      </div>
+    </StepContent>
+  </Step>
+  
+  <Step>
+    <StepTitle>Step 4: Install Required Software</StepTitle>
+    <StepContent>
+    <div>
+      Install the software that Caddy Control needs:
+      
+      ```sh
+      pnpm install
+      ```
+      
+      <Note>
+        You can also use npm install or yarn if you don't have pnpm.
+      </Note>
+      </div>
+    </StepContent>
+  </Step>
+  
+  <Step>
+    <StepTitle>Step 5: Start Caddy Control</StepTitle>
+    <StepContent>
+    <div>
+      Start the application:
+      
+      ```sh
+      pnpm dev
+      ```
+      
+      The first time you run Caddy Control, it will create an admin account:
+      <ul>
+        <li><strong>Username:</strong> admin</li>
+        <li><strong>Password:</strong> admin</li>
+      </ul>
+      
+      You'll need to change this password when you first log in.
+      </div>
+    </StepContent>
+  </Step>
+</Steps>
+
+## Setting Up on a Real Server
+
+For real-world use, we recommend using Docker to set up Caddy Control on your server.
+
+<Steps>
+  <Step>
+    <StepTitle>Step 1: Make Sure Your Server is Ready</StepTitle>
+    <StepContent>
+    <div>
+      <p>Your server needs:</p>
+      <ul>
+        <li>A public IP address so others can reach it</li>
+        <li>Open ports 80 and 443 for web traffic</li>
+        <li>Docker and Docker Compose installed</li>
+      </ul>
+      </div>
+    </StepContent>
+  </Step>
+  
+  <Step>
+    <StepTitle>Step 2: Run Our Setup Script</StepTitle>
+    <StepContent>
+    <div>
+      <p>Use this command to automatically set up everything:</p>
+      
+      ```sh
+      bash -c "$(curl -sSL https://raw.githubusercontent.com/avashForReal/caddy-control/refs/heads/main/deploy.sh)"
+      ```
+      
+      <img src="/setup.png" alt="Setup Screen" className="border border-gray-300 rounded-md my-4" />
+      
+      You'll need to provide:
+      <ul>
+        <li><strong>Server IP</strong>: Your server's public IP address</li>
+        <li><strong>App Host Domain</strong>: The website address you'll use for Caddy Control</li>
+        <li><strong>Secret Key</strong>: A password to secure your logins (or let us create one)</li>
+      </ul>
+      </div>
+    </StepContent>
+  </Step>
+  
+  <Step>
+    <StepTitle>Step 3: Set Up Your Domain</StepTitle>
+    <StepContent>
+    <div>
+      <p>You'll need to point your domain to your server's IP address.</p>
+      
+      <FolderTree className="overflow-hidden p-2">
+        <Folder element="Domain Settings" defaultOpen={true}>
+          <File>
+            <p>yourdomain.com → Your Server IP</p>
+          </File>
+        </Folder>
+      </FolderTree>
+      
+      <Note>
+        Any domains you manage with Caddy Control will also need to point to your server's IP.
+      </Note>
+      </div>
+    </StepContent>
+  </Step>
+  
+  <Step>
+    <StepTitle>Step 4: Log Into Caddy Control</StepTitle>
+    <StepContent>
+    <div>
+      <p>Once setup is complete, visit your domain in a web browser.</p>
+      
+      Log in with:
+      <ul>
+        <li><strong>Username:</strong> admin</li>
+        <li><strong>Password:</strong> admin</li>
+      </ul>
+      
+      You'll be asked to create a new password right away.
+      </div>
+    </StepContent>
+  </Step>
+</Steps>
+
+## Making Sure It Works
+
+After installing, check that everything is working by:
+
+1. Logging into the dashboard
+2. Creating an API key
+3. Adding a test domain 
+4. Checking that HTTPS security is set up automatically
+
+## What's Next?
+
+Now that you have Caddy Control working, check out the [Quick Start Guide](/docs/getting-started/quick-start) to learn how to use it.

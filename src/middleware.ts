@@ -3,7 +3,7 @@ import { verifyToken } from "./app/api/_services/token/token.service";
 import prisma from "./lib/prisma";
 import { JwtPayload } from "jsonwebtoken";
 
-const unauthenticatedRoutes = ["/api/user/login"]
+const unauthenticatedRoutes = ["/api/user/login"];
 
 export async function middleware(req: NextRequest) {
   if (unauthenticatedRoutes.includes(req.nextUrl.pathname)) {
@@ -59,6 +59,17 @@ export async function middleware(req: NextRequest) {
   const user = await prisma.user.findUnique({
     where: {
       id: (tokenPayload as JwtPayload).id!,
+    },
+    include: {
+      role: {
+        include: {
+          permissions: {
+            include: {
+              permission: true,
+            },
+          },
+        },
+      },
     },
   });
   if (!user) {

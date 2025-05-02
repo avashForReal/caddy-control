@@ -9,10 +9,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { Resources } from '@/config/resources'
 import { useLogout } from '@/hooks/user/user.hooks'
 import { getInitialsForAvatar } from '@/lib/utils'
-import { useAuthStore } from '@/store/authStore'
-import { IconPassword } from '@tabler/icons-react'
+import { useAuthStore, hasPermission } from '@/store/authStore'
+import { IconPassword, IconSettings } from '@tabler/icons-react'
+import Link from 'next/link'
 
 type Props = {
   openPasswordDialog: () => void
@@ -24,6 +26,9 @@ export function ProfileDropdown({
   const logOut = useLogout()
   const { user } = useAuthStore()
   const nameInitials = getInitialsForAvatar(user?.username || 'xo')
+
+  // Check if user has access to settings (admin or has user_management:manage permission)
+  const hasSettingsAccess = user?.isAdmin || hasPermission(Resources.WithManage(Resources.USER_MANAGEMENT)) || hasPermission(Resources.WithView(Resources.USER_MANAGEMENT))
 
   return (
     <DropdownMenu modal={false}>
@@ -42,6 +47,14 @@ export function ProfileDropdown({
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
+          {hasSettingsAccess && (
+            <Link href="/settings" passHref>
+              <DropdownMenuItem className='flex items-center justify-between'>
+                <span>Settings</span>
+                <IconSettings size={16} />
+              </DropdownMenuItem>
+            </Link>
+          )}
           <DropdownMenuItem className='flex items-center justify-between' onClick={openPasswordDialog}>
             <span>Change password</span>
             <IconPassword />

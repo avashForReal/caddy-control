@@ -1,13 +1,33 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getCaddyConfig } from "../../_services/caddy/caddy-service";
+import {
+  getUserFromHeader,
+  hasPermission,
+} from "../../_services/user/user-service";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    // Get user from request headers
+    const user = await getUserFromHeader(request);
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Having proxy_management:manage permission automatically includes proxy_management:view access
+    if (!user.isAdmin && !hasPermission(user, "proxy_management:view")) {
+      return NextResponse.json(
+        { error: "Forbidden - Insufficient permissions" },
+        { status: 403 }
+      );
+    }
+
     const caddyConfig = await getCaddyConfig();
     return NextResponse.json(caddyConfig);
-  } catch {
+  } catch (error) {
+    console.error("Error fetching Caddy configuration:", error);
     return NextResponse.json(
-      { error: 'Failed to retrieve Caddy configuration' }, 
+      { error: "Failed to retrieve Caddy configuration" },
       { status: 500 }
     );
   }
